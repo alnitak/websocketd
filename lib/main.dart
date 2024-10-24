@@ -274,12 +274,15 @@ class _MyHomePageState extends State<MyHomePage> {
             TextField(
               controller: TextEditingController(text: command.join(' ')),
               style: const TextStyle(fontSize: 12),
+              minLines: 1,
+              maxLines: 2,
             ),
             const SizedBox(height: 8),
 
             /// OUTPUT
             TextField(
               controller: outputController,
+              minLines: 3,
               maxLines: 12,
               style: const TextStyle(fontSize: 12),
               decoration: InputDecoration(
