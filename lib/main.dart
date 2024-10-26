@@ -83,8 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int srId = 2;
   int chId = 0;
   int fmtId = 0;
-  final audioPath = '/home/deimos/5/free/shadertoy/ElectroNebulae.mp3';
-  // final audioPath = '/home/deimos/5/12.-Animal Instinct.flac';
+  final audioPath = 'ADD HERE YOUR AUDIO FILE';
   final outputController = TextEditingController(text: '');
 
   @override
@@ -152,6 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
     command.add('-c');
     command.add('websocketd --port=8080 --binary=true '
         'ffmpeg '
+        '-loglevel error '
         '-readrate ${(nativeFrameRate * 10).floorToDouble() / 10} '
         '-i "$audioPath" '
         '-f ${format[fmtId]} $acodec -ac ${Channels.values[chId].count} '
