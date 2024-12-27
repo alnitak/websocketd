@@ -1,4 +1,5 @@
 A Flutter project that use `ffmpeg` to send PCM audio data through a websocked.
+![websocketd](https://github.com/user-attachments/assets/f31a793a-400c-40a2-8bf5-8d798576d945)
 
 # Usage
 
