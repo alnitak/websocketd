@@ -78,11 +78,18 @@ class _MyHomePageState extends State<MyHomePage> {
   Process? process;
   List<String> command = [];
   double nativeFrameRate = 0;
-  final sampleRate = [11025, 22050, 44100, 48000];
-  final format = ['f32le', 's8', 's16le', 's32le'];
-  int srId = 2;
+  // Supported Opus sample rates:
+  // 48000
+  // 24000
+  // 16000
+  // 12000
+  // 8000
+
+  final sampleRate = [8000, 12000, 16000, 24000, 44100, 48000];
+  final format = ['f32le', 's8', 's16le', 's32le', 'opus'];
+  int srId = 5;
   int chId = 0;
-  int fmtId = 0;
+  int fmtId = 4;
   final audioPath = 'ADD HERE YOUR AUDIO FILE';
   final outputController = TextEditingController(text: '');
 
@@ -145,17 +152,22 @@ class _MyHomePageState extends State<MyHomePage> {
       1 => '',
       2 => '-acodec pcm_s16le',
       3 => '-acodec pcm_s32le',
+      4 => '-acodec libopus',
       _ => '',
     };
+    // ffmpeg -loglevel error -readrate 0.0 -i "~/free/shadertoy/ElectroNebulae.mp3" 
+    // -f opus -c:a libopus -ac 1 -ar 48000 -application audio output.opus
     command.add('/bin/bash');
     command.add('-c');
+    // command.add('websocketd --port=8080 --binary=true '
+    //   'cat ~/8/test_my_opus/ElectroNebulae-48KHz-mono.opus');
     command.add('websocketd --port=8080 --binary=true '
         'ffmpeg '
         '-loglevel error '
-        '-readrate ${(nativeFrameRate * 10).floorToDouble() / 10} '
+        '-readrate ${(nativeFrameRate * 100).floorToDouble() / 100} '
         '-i "$audioPath" '
         '-f ${format[fmtId]} $acodec -ac ${Channels.values[chId].count} '
-        '-ar ${sampleRate[srId]} -');
+        '-ar ${sampleRate[srId]} -application audio -');
     return command;
   }
 
@@ -255,7 +267,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Slider(
                   value: nativeFrameRate,
                   min: 0,
-                  max: 4,
+                  max: 3,
                   onChanged: (value) {
                     setState(() {
                       nativeFrameRate = value;
@@ -264,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                   },
                 ),
-                Text('${nativeFrameRate.toStringAsFixed(1)}X    '
+                Text('${nativeFrameRate.toStringAsFixed(2)}X    '
                     '1 = real-time speed '
                     'at native frame rate. 0 no limitation on speed'),
               ],
