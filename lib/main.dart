@@ -157,10 +157,11 @@ class _MyHomePageState extends State<MyHomePage> {
     };
     // ffmpeg -loglevel error -readrate 0.0 -i "~/free/shadertoy/ElectroNebulae.mp3" 
     // -f opus -c:a libopus -ac 1 -ar 48000 -application audio output.opus
+    // Remove the following 2 lines on Windows
     command.add('/bin/bash');
     command.add('-c');
     // command.add('websocketd --port=8080 --binary=true '
-    //   'cat ~/8/test_my_opus/ElectroNebulae-48KHz-mono.opus');
+    //   'cat ~/8/openai_speech.opus');
     command.add('websocketd --port=8080 --binary=true '
         'ffmpeg '
         '-loglevel error '

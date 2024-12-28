@@ -3,7 +3,7 @@ A Flutter project that use `ffmpeg` to send PCM audio data through a websocked.
 
 # Usage
 
-Be sure to have `websocketd` and `ffmpeg` installed (on Linux these packages are available using you package manager).
+Be sure to have [websocketd](http://websocketd.com/#download) and [ffmpeg](https://www.ffmpeg.org/download.html) installed (on Linux these packages are available using you package manager).
 Also modify in `main.dart` the `final audioPath` to point to an audio file on you PC.
 
 You can then choose which PCM audio data format you want to use and send through the websocket.
