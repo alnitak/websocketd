@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:process/process.dart';
 
@@ -155,10 +156,15 @@ class _MyHomePageState extends State<MyHomePage> {
       4 => '-acodec libopus',
       _ => '',
     };
-    // ffmpeg -loglevel error -readrate 0.0 -i "~/free/shadertoy/ElectroNebulae.mp3" 
+    // ffmpeg -loglevel error -readrate 0.0 -i "~/free/shadertoy/ElectroNebulae.mp3"
     // -f opus -c:a libopus -ac 1 -ar 48000 -application audio output.opus
     // Remove the following 2 lines on Windows
-    command.add('/bin/bash');
+    if (defaultTargetPlatform == TargetPlatform.linux) {
+      command.add('/bin/bash');
+    }
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
+      command.add('/bin/zsh');
+    }
     command.add('-c');
     // command.add('websocketd --port=8080 --binary=true '
     //   'cat ~/8/openai_speech.opus');
@@ -169,6 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
         '-i "$audioPath" '
         '-f ${format[fmtId]} $acodec -ac ${Channels.values[chId].count} '
         '-ar ${sampleRate[srId]} -application audio -');
+    print(command);
     return command;
   }
 
@@ -181,7 +188,6 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              
               children: [
                 /// SAMPLERATE
                 Column(
@@ -257,7 +263,12 @@ class _MyHomePageState extends State<MyHomePage> {
             OutlinedButton(
               onPressed: () {
                 outputController.text = '';
-                Process.start('/bin/bash', ['-c', 'killall -9 websocketd']);
+                if (defaultTargetPlatform == TargetPlatform.linux) {
+                  Process.start('/bin/bash', ['-c', 'killall -9 websocketd']);
+                }
+                if (defaultTargetPlatform == TargetPlatform.macOS) {
+                  Process.start('/bin/zsh', ['-c', 'killall -9 websocketd']);
+                }
               },
               child: const Text('kill ALL websocketd'),
             ),
@@ -268,7 +279,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Slider(
                   value: nativeFrameRate,
                   min: 0,
-                  max: 3,
+                  max: 10,
                   onChanged: (value) {
                     setState(() {
                       nativeFrameRate = value;
