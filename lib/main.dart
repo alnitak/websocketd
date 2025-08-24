@@ -46,18 +46,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   final commandController = TextEditingController(text: '');
   final outputController = TextEditingController(text: '');
 
-  // final audioPath = 'ADD HERE YOUR AUDIO FILE';
-  // final audioPath = '/home/deimos/Music/POP 2005/Blue - Breath Easy.mp3';
-  // final audioPath = '/home/deimos/Music/POP 2005/Rolling Stones - A Bigger Bang - Rain Fall Down.mp3';
-  // final audioPath = '/home/deimos/FLUTTER/libs/flutter_soloud/example/assets/audio/8_bit_mentality.mp3';
-  // final audioPath = '/home/deimos/5/12.-Animal Instinct.flac';
-  // final audioPath = '/home/deimos/FLUTTER/libs/flutter_soloud/example/assets/audio/IveSeenThings.mp3';
-
-  // https://dir.xiph.org/codecs
-  // final audioPath = 'http://as.fm1.be:8000/wrgm1'; // MP3 streaming radio
-  // final audioPath = 'http://xfer.hirschmilch.de:8000/prog-house.opus'; // OPUS streaming radio
-  // final audioPath = 'http://superaudio.radio.br:8074/stream'; // OGG streaming radio
-
   @override
   void initState() {
     super.initState();

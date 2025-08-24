@@ -29,14 +29,15 @@ class _FfmpegPageState extends State<FfmpegPage> {
   double nativeFrameRate = 0;
   // Supported Opus sample rates:
   final sampleRate = [8000, 12000, 16000, 24000, 44100, 48000];
-  final format = ['f32le', 's8', 's16le', 's32le', 'opus', 'mp3'];
+  final format = ['f32le', 's8', 's16le', 's32le', 'opus', 'vorbis', 'mp3'];
   int srId = 5;
   int chId = 0;
-  int fmtId = 5;
+  int fmtId = 6;
   bool stripMetaData = true;
 
   /// ADD HERE YOUR AUDIO FILES with full paths
   List<String> audioPaths = [
+    
   ];
   int audioPathId = 0;
 
@@ -59,20 +60,17 @@ class _FfmpegPageState extends State<FfmpegPage> {
 
     command.clear();
     final acodec = switch (fmtId) {
-      0 => '-acodec pcm_f32le',
+      0 => '-f f32le -acodec pcm_f32le',
       1 => '',
-      2 => '-acodec pcm_s16le',
-      3 => '-acodec pcm_s32le',
-      4 => '-acodec libopus',
-      5 => '-acodec libmp3lame',
+      2 => '-f s16le -acodec pcm_s16le',
+      3 => '-f s32le -acodec pcm_s32le',
+      4 => '-f opus -acodec libopus',
+      5 => '-f ogg -acodec libvorbis',
+      6 => '-f mp3 -acodec libmp3lame',
       _ => '',
     };
 
     final sm = stripMetaData ? '-map_metadata -1 -vn' : '';
-
-    // /bin/bash -c websocketd --port=8080 --binary=true ffmpeg -loglevel error
-    // -readrate 0.0 -i "/home/deimos/5/12.-Animal Instinct.flac" -map_metadata
-    // -1 -vn -f mp3 -acodec libmp3lame -ac 1 -ar 48000 -application audio -
     command.add(widget.shell);
     command.add('-c');
     command.add('websocketd --port=8080 --binary=true '
@@ -81,7 +79,8 @@ class _FfmpegPageState extends State<FfmpegPage> {
         '-readrate ${(nativeFrameRate * 100).floorToDouble() / 100} '
         '-i "${audioPaths[audioPathId]}" '
         '$sm ' // strip metadata and video
-        '-f ${format[fmtId]} $acodec -ac ${Channels.values[chId].count} '
+        '$acodec -ac ${Channels.values[chId].count} '
+        '-vn ' // be sure to remove video
         '-ar ${sampleRate[srId]} -application audio -');
     widget.onCommandChanged(command);
     return command;
@@ -99,6 +98,7 @@ class _FfmpegPageState extends State<FfmpegPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -122,72 +122,90 @@ class _FfmpegPageState extends State<FfmpegPage> {
         Row(
           children: [
             /// SAMPLERATE
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (var i = 0; i < sampleRate.length; i++)
-                  SizedBox(
-                    width: 160,
-                    child: RadioListTile<int>(
-                      title: Text(sampleRate[i].toString()),
-                      value: i,
-                      groupValue: srId,
-                      onChanged: (int? value) {
-                        setState(() {
-                          srId = value!;
-                          composeFfmpegCommand();
-                          widget.onStartProcess();
-                        });
-                      },
+            RadioGroup<int>(
+              groupValue: srId,
+              onChanged: (int? value) {
+                setState(() {
+                  srId = value!;
+                  composeFfmpegCommand();
+                  widget.onStartProcess();
+                });
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < sampleRate.length; i++)
+                    SizedBox(
+                      width: 160,
+                      child: RadioListTile<int>(
+                        title: Text(sampleRate[i].toString()),
+                        value: i,
+                        visualDensity: const VisualDensity(
+                          horizontal: VisualDensity.minimumDensity,
+                          vertical: VisualDensity.minimumDensity,
+                        ),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
 
             /// CHANNELS
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (var i = 0; i < Channels.values.length; i++)
-                  SizedBox(
-                    width: 210,
-                    child: RadioListTile<int>(
-                      title: Text(Channels.values[i].toString()),
-                      value: i,
-                      groupValue: chId,
-                      onChanged: (int? value) {
-                        setState(() {
-                          chId = value!;
-                          composeFfmpegCommand();
-                          widget.onStartProcess();
-                        });
-                      },
+            RadioGroup<int>(
+              groupValue: chId,
+              onChanged: (int? value) {
+                setState(() {
+                  chId = value!;
+                  composeFfmpegCommand();
+                  widget.onStartProcess();
+                });
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < Channels.values.length; i++)
+                    SizedBox(
+                      width: 210,
+                      child: RadioListTile<int>(
+                        title: Text(Channels.values[i].toString()),
+                        value: i,
+                        visualDensity: const VisualDensity(
+                          horizontal: VisualDensity.minimumDensity,
+                          vertical: VisualDensity.minimumDensity,
+                        ),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
 
             /// FORMAT
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (var i = 0; i < format.length; i++)
-                  SizedBox(
-                    width: 160,
-                    child: RadioListTile<int>(
-                      title: Text(format[i]),
-                      value: i,
-                      groupValue: fmtId,
-                      onChanged: (int? value) {
-                        setState(() {
-                          fmtId = value!;
-                          composeFfmpegCommand();
-                          widget.onStartProcess();
-                        });
-                      },
+            RadioGroup<int>(
+              groupValue: fmtId,
+              onChanged: (int? value) {
+                setState(() {
+                  fmtId = value!;
+                  composeFfmpegCommand();
+                  widget.onStartProcess();
+                });
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < format.length; i++)
+                    SizedBox(
+                      width: 160,
+                      child: RadioListTile<int>(
+                        title: Text(format[i]),
+                        value: i,
+                        visualDensity: const VisualDensity(
+                          horizontal: VisualDensity.minimumDensity,
+                          vertical: VisualDensity.minimumDensity,
+                        ),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

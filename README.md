@@ -4,7 +4,7 @@ A Flutter project that uses `ffmpeg` to send chunks of audio data through a webs
 
 # Usage
 
-Be sure to have [websocketd](http://websocketd.com/#download), [ffmpeg](https://www.ffmpeg.org/download.html), and [wget](https://www.gnu.org/software/wget/) installed (on Linux, these packages are available using your package manager).
+Be sure to have [websocketd](http://websocketd.com/#download), [ffmpeg](https://www.ffmpeg.org/download.html), and [curl](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://curl.se) installed (on Linux, these packages are available using your package manager).
 Also, add in `send_plain_file.dart`, `ffmpeg_page.dart`, and `send_url.dart` the variables containing the paths or the URLs.
 
 You can then choose which audio data format you want to use and send it through the websocket. 
