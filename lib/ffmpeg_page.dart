@@ -29,15 +29,19 @@ class _FfmpegPageState extends State<FfmpegPage> {
   double nativeFrameRate = 0;
   // Supported Opus sample rates:
   final sampleRate = [8000, 12000, 16000, 24000, 44100, 48000];
-  final format = ['f32le', 's8', 's16le', 's32le', 'opus', 'vorbis', 'mp3'];
+  final format = ['f32le', 's8', 's16le', 's32le', 'ogg/opus', 'ogg/vorbis', 'ogg/flac', 'flac', 'mp3'];
   int srId = 5;
   int chId = 0;
-  int fmtId = 6;
+  int fmtId = 8;
   bool stripMetaData = true;
 
   /// ADD HERE YOUR AUDIO FILES with full paths
   List<String> audioPaths = [
-    
+    '/Volumes/NVME/Users/deimos/Music/tests/mp3.mp3',
+    '/Volumes/NVME/Users/deimos/Music/tests/flac.flac',
+    '/Volumes/NVME/Users/deimos/Music/tests/ogg_opus.ogg',
+    '/Volumes/NVME/Users/deimos/Music/tests/ogg_vorbis.ogg',
+    '/Volumes/NVME/Users/deimos/Music/tests/ogg_flac.ogg',
   ];
   int audioPathId = 0;
 
@@ -66,7 +70,9 @@ class _FfmpegPageState extends State<FfmpegPage> {
       3 => '-f s32le -acodec pcm_s32le',
       4 => '-f opus -acodec libopus',
       5 => '-f ogg -acodec libvorbis',
-      6 => '-f mp3 -acodec libmp3lame',
+      6 => '-f ogg -acodec flac',
+      7 => '-f flac -acodec flac',
+      8 => '-f mp3 -acodec libmp3lame',
       _ => '',
     };
 
@@ -194,7 +200,7 @@ class _FfmpegPageState extends State<FfmpegPage> {
                 children: [
                   for (var i = 0; i < format.length; i++)
                     SizedBox(
-                      width: 160,
+                      width: 210,
                       child: RadioListTile<int>(
                         title: Text(format[i]),
                         value: i,
