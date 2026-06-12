@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 /// This widget allows sending a plain file over WebSocket without using ffmpeg.
@@ -24,7 +26,11 @@ class _SendPlainFileState extends State<SendPlainFile> {
 
   /// ADD HERE YOUR AUDIO FILES with full paths
   List<String> audioPaths = [
-    
+    '/Volumes/NVME/Users/deimos/Music/tests/mp3.mp3',
+    '/Volumes/NVME/Users/deimos/Music/tests/flac.flac',
+    '/Volumes/NVME/Users/deimos/Music/tests/ogg_opus.ogg',
+    '/Volumes/NVME/Users/deimos/Music/tests/ogg_vorbis.ogg',
+    '/Volumes/NVME/Users/deimos/Music/tests/ogg_flac.ogg',
   ];
   int audioPathId = 0;
   int sendTimeDelayMs = 100;
@@ -35,11 +41,18 @@ class _SendPlainFileState extends State<SendPlainFile> {
 
     command.clear();
     final fr = sendTimeDelayMs / 1000;
+    final audioPath = audioPaths[audioPathId];
+    final fileSize = File(audioPath).lengthSync();
+    final numChunks = (fileSize + chunkSize - 1) ~/ chunkSize;
 
+    // count the number of chunks up-front from the file size, then loop exactly
+    // that many times using "dd if=... skip=$i". Once all chunks are sent,
+    // the shell exits, websocketd closes the WebSocket, and the
+    // receiver’s "onDone" fires.
     command.addAll([
       '/bin/bash',
       '-c',
-      'websocketd --port=8080 --binary=true ${widget.shell} -c "exec 3<\\"${audioPaths[audioPathId]}\\"; while dd bs=$chunkSize count=1 <&3 status=none; do sleep $fr; done"'
+      'websocketd --port=8080 --binary=true ${widget.shell} -c \'audioPath="$audioPath"; chunkSize=$chunkSize; numChunks=$numChunks; fr=$fr; i=0; while [ \$i -lt $numChunks ]; do dd if="$audioPath" bs=$chunkSize skip=\$i count=1 status=none 2>/dev/null; i=\$((i+1)); sleep $fr; done\'',
     ]);
     widget.onCommandChanged(command);
   }
