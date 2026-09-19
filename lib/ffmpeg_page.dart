@@ -29,7 +29,20 @@ class _FfmpegPageState extends State<FfmpegPage> {
   double nativeFrameRate = 0;
   // Supported Opus sample rates:
   final sampleRate = [8000, 12000, 16000, 24000, 44100, 48000];
-  final format = ['f32le', 's8', 's16le', 's32le', 'ogg/opus', 'ogg/vorbis', 'ogg/flac', 'flac', 'mp3'];
+  final format = [
+    'f32le',
+    's8',
+    's16le',
+    's32le',
+    'ogg/opus',
+    'ogg/vorbis',
+    'ogg/flac',
+    'flac',
+    'mp3',
+    'aac',
+    'ac3',
+    'eac3',
+  ];
   int srId = 5;
   int chId = 0;
   int fmtId = 8;
@@ -73,6 +86,9 @@ class _FfmpegPageState extends State<FfmpegPage> {
       6 => '-f ogg -acodec flac',
       7 => '-f flac -acodec flac',
       8 => '-f mp3 -acodec libmp3lame',
+      9 => '-f adts -acodec aac',
+      12 => '-f ac3 -acodec ac3',
+      13 => '-f eac3 -acodec eac3',
       _ => '',
     };
 
@@ -104,7 +120,6 @@ class _FfmpegPageState extends State<FfmpegPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -195,21 +210,45 @@ class _FfmpegPageState extends State<FfmpegPage> {
                   widget.onStartProcess();
                 });
               },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (var i = 0; i < format.length; i++)
-                    SizedBox(
-                      width: 210,
-                      child: RadioListTile<int>(
-                        title: Text(format[i]),
-                        value: i,
-                        visualDensity: const VisualDensity(
-                          horizontal: VisualDensity.minimumDensity,
-                          vertical: VisualDensity.minimumDensity,
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var i = 0; i < (format.length / 2).ceil(); i++)
+                        SizedBox(
+                          width: 140,
+                          child: RadioListTile<int>(
+                            title: Text(format[i]),
+                            value: i,
+                            visualDensity: const VisualDensity(
+                              horizontal: VisualDensity.minimumDensity,
+                              vertical: VisualDensity.minimumDensity,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                    ],
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var i = (format.length / 2).ceil();
+                          i < format.length;
+                          i++)
+                        SizedBox(
+                          width: 140,
+                          child: RadioListTile<int>(
+                            title: Text(format[i]),
+                            value: i,
+                            visualDensity: const VisualDensity(
+                              horizontal: VisualDensity.minimumDensity,
+                              vertical: VisualDensity.minimumDensity,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -247,9 +286,11 @@ class _FfmpegPageState extends State<FfmpegPage> {
                 widget.onStartProcess();
               },
             ),
-            Text('${nativeFrameRate.toStringAsFixed(2)}X    '
-                '1 = real-time speed '
-                'at native frame rate. 0 no limitation on speed'),
+            Expanded(
+              child: Text('${nativeFrameRate.toStringAsFixed(2)}X    '
+                  '1 = real-time speed '
+                  'at native frame rate. 0 no limitation on speed'),
+            ),
           ],
         ),
       ],
