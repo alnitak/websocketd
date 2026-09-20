@@ -87,8 +87,8 @@ class _FfmpegPageState extends State<FfmpegPage> {
       7 => '-f flac -acodec flac',
       8 => '-f mp3 -acodec libmp3lame',
       9 => '-f adts -acodec aac',
-      12 => '-f ac3 -acodec ac3',
-      13 => '-f eac3 -acodec eac3',
+      10 => '-f ac3 -acodec ac3',
+      11 => '-f eac3 -acodec eac3',
       _ => '',
     };
 
