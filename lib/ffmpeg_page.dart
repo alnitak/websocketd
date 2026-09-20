@@ -59,13 +59,22 @@ class _FfmpegPageState extends State<FfmpegPage> {
           'C:/workspace/libs/flutter_soloud/example/assets/audio/sample-vorbis.ogg',
           'C:/5/8_bit_mentality.mp3',
         ]
-      : [
-          '/Volumes/NVME/Users/deimos/Music/tests/mp3.mp3',
-          '/Volumes/NVME/Users/deimos/Music/tests/flac.flac',
-          '/Volumes/NVME/Users/deimos/Music/tests/ogg_opus.ogg',
-          '/Volumes/NVME/Users/deimos/Music/tests/ogg_vorbis.ogg',
-          '/Volumes/NVME/Users/deimos/Music/tests/ogg_flac.ogg',
-        ];
+      : Platform.isMacOS
+          ? [
+              '/Volumes/NVME/Users/deimos/Music/tests/mp3.mp3',
+              '/Volumes/NVME/Users/deimos/Music/tests/flac.flac',
+              '/Volumes/NVME/Users/deimos/Music/tests/ogg_opus.ogg',
+              '/Volumes/NVME/Users/deimos/Music/tests/ogg_vorbis.ogg',
+              '/Volumes/NVME/Users/deimos/Music/tests/ogg_flac.ogg',
+            ]
+          : Platform.isLinux
+              ? [
+                  '/home/deimos/FLUTTER/libs/flutter_soloud/example/assets/audio/sample-MP3.mp3',
+                  '/home/deimos/FLUTTER/libs/flutter_soloud/example/assets/audio/sample-FLAC.flac',
+                  '/home/deimos/FLUTTER/libs/flutter_soloud/example/assets/audio/sample-OPUS.opus',
+                  '/home/deimos/FLUTTER/libs/flutter_soloud/example/assets/audio/sample-vorbis.ogg',
+                ]
+              : [];
   int audioPathId = 0;
 
   List<String> composeFfmpegCommand() {
