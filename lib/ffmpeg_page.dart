@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_websocketd/enums.dart';
 
@@ -49,13 +51,21 @@ class _FfmpegPageState extends State<FfmpegPage> {
   bool stripMetaData = true;
 
   /// ADD HERE YOUR AUDIO FILES with full paths
-  List<String> audioPaths = [
-    '/Volumes/NVME/Users/deimos/Music/tests/mp3.mp3',
-    '/Volumes/NVME/Users/deimos/Music/tests/flac.flac',
-    '/Volumes/NVME/Users/deimos/Music/tests/ogg_opus.ogg',
-    '/Volumes/NVME/Users/deimos/Music/tests/ogg_vorbis.ogg',
-    '/Volumes/NVME/Users/deimos/Music/tests/ogg_flac.ogg',
-  ];
+  List<String> audioPaths = Platform.isWindows
+      ? [
+          'C:/workspace/libs/flutter_soloud/example/assets/audio/sample-MP3.mp3',
+          'C:/workspace/libs/flutter_soloud/example/assets/audio/sample-FLAC.flac',
+          'C:/workspace/libs/flutter_soloud/example/assets/audio/sample-OPUS.opus',
+          'C:/workspace/libs/flutter_soloud/example/assets/audio/sample-vorbis.ogg',
+          'C:/5/8_bit_mentality.mp3',
+        ]
+      : [
+          '/Volumes/NVME/Users/deimos/Music/tests/mp3.mp3',
+          '/Volumes/NVME/Users/deimos/Music/tests/flac.flac',
+          '/Volumes/NVME/Users/deimos/Music/tests/ogg_opus.ogg',
+          '/Volumes/NVME/Users/deimos/Music/tests/ogg_vorbis.ogg',
+          '/Volumes/NVME/Users/deimos/Music/tests/ogg_flac.ogg',
+        ];
   int audioPathId = 0;
 
   List<String> composeFfmpegCommand() {
@@ -92,18 +102,31 @@ class _FfmpegPageState extends State<FfmpegPage> {
       _ => '',
     };
 
-    final sm = stripMetaData ? '-map_metadata -1 -vn' : '';
-    command.add(widget.shell);
-    command.add('-c');
-    command.add('websocketd --port=8080 --binary=true '
-        'ffmpeg '
-        '-loglevel error '
-        '-readrate ${(nativeFrameRate * 100).floorToDouble() / 100} '
-        '-i "${audioPaths[audioPathId]}" '
-        '$sm ' // strip metadata and video
-        '$acodec -ac ${Channels.values[chId].count} '
-        '-vn ' // be sure to remove video
-        '-ar ${sampleRate[srId]} -application audio -');
+    final sm = stripMetaData ? ['-map_metadata', '-1', '-vn'] : <String>[];
+    final readRate = (nativeFrameRate * 100).floorToDouble() / 100;
+
+    command.addAll([
+      'websocketd',
+      '--port=8080',
+      '--binary=true',
+      'ffmpeg',
+      '-loglevel',
+      'error',
+      '-readrate',
+      '$readRate',
+      '-i',
+      audioPaths[audioPathId],
+      ...sm,
+      ...acodec.split(' ').where((s) => s.isNotEmpty),
+      '-ac',
+      '${Channels.values[chId].count}',
+      '-vn',
+      '-ar',
+      '${sampleRate[srId]}',
+      '-application',
+      'audio',
+      '-',
+    ]);
     widget.onCommandChanged(command);
     return command;
   }
@@ -129,7 +152,7 @@ class _FfmpegPageState extends State<FfmpegPage> {
           items: List.generate(audioPaths.length, (index) {
             return DropdownMenuItem<int>(
               value: index,
-              child: Text(audioPaths[index].split('/').last),
+              child: Text(audioPaths[index].split(RegExp(r'[/\\]')).last),
             );
           }),
           onChanged: (value) {

@@ -32,19 +32,15 @@ class _SendUrlState extends State<SendUrl> {
   int audioUrlId = 0;
 
   void composeUrlCommand() {
-    // /bin/bash -c 'websocketd --port=8080 --binary=true /bin/bash -c "curl --no-buffer -s http://example.com/stream"'
-
     command.clear();
-    double nativeFrameRate = 0.1;
-    double fr = (nativeFrameRate * 100).floorToDouble() / 100;
-    if (fr == 0) {
-      fr = 0.01;
-    }
-
     command.addAll([
-      '/bin/bash',
-      '-c',
-      'websocketd --port=8080 --binary=true ${widget.shell} -c "curl --no-buffer -s ${audioUrls[audioUrlId].values.first}"'
+      'websocketd',
+      '--port=8080',
+      '--binary=true',
+      'curl',
+      '--no-buffer',
+      '-s',
+      audioUrls[audioUrlId].values.first,
     ]);
     widget.onCommandChanged(command);
   }

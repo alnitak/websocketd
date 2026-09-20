@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   late final TabController tabController;
   Process? process;
   String shell = '';
-  List<String> command = ['/bin/bash'];
+  List<String> command = ['websocketd'];
   final commandController = TextEditingController(text: '');
   final outputController = TextEditingController(text: '');
 
@@ -51,9 +51,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.initState();
     if (defaultTargetPlatform == TargetPlatform.linux) {
       shell = '/bin/bash';
-    }
-    if (defaultTargetPlatform == TargetPlatform.macOS) {
+    } else if (defaultTargetPlatform == TargetPlatform.macOS) {
       shell = '/bin/zsh';
+    } else if (defaultTargetPlatform == TargetPlatform.windows) {
+      if (File(r'C:\Program Files\Git\bin\bash.exe').existsSync()) {
+        shell = r'C:\Program Files\Git\bin\bash.exe';
+      } else {
+        shell = 'cmd.exe';
+      }
     }
     killAllWebsocketd();
     localProcess = const LocalProcessManager();
@@ -68,27 +73,36 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void startProcess() {
+  Future<void> startProcess() async {
     if (process != null) {
       localProcess.killPid(process!.pid);
+      process = null;
     }
+    await killAllWebsocketd();
     outputController.text = '';
-
-    localProcess.start(runInShell: true, command).then((proc) {
+    try {
+      final proc = await localProcess.start(runInShell: true, command);
       process = proc;
-
       process!.stdout.listen((onData) {
         outputController.text += String.fromCharCodes(onData);
       });
-
       process!.stderr.listen((onData) {
         outputController.text += String.fromCharCodes(onData);
       });
-    });
+      process!.exitCode.then((code) {
+        outputController.text += '\n[websocketd exited with code $code]';
+      });
+    } catch (e) {
+      outputController.text = 'Error starting process: $e';
+    }
   }
 
-  void killAllWebsocketd() {
-    Process.start(shell, ['-c', 'killall -9 websocketd']);
+  Future<void> killAllWebsocketd() async {
+    if (Platform.isWindows) {
+      await Process.run('taskkill', ['/F', '/IM', 'websocketd.exe', '/T']);
+    } else {
+      await Process.run('killall', ['-9', 'websocketd']);
+    }
   }
 
   Widget getChild() {

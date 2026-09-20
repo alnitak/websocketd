@@ -25,34 +25,44 @@ class _SendPlainFileState extends State<SendPlainFile> {
   List<String> command = [];
 
   /// ADD HERE YOUR AUDIO FILES with full paths
-  List<String> audioPaths = [
-    '/Volumes/NVME/Users/deimos/Music/tests/mp3.mp3',
-    '/Volumes/NVME/Users/deimos/Music/tests/flac.flac',
-    '/Volumes/NVME/Users/deimos/Music/tests/ogg_opus.ogg',
-    '/Volumes/NVME/Users/deimos/Music/tests/ogg_vorbis.ogg',
-    '/Volumes/NVME/Users/deimos/Music/tests/ogg_flac.ogg',
-  ];
+  List<String> audioPaths = Platform.isWindows
+      ? [
+          'C:/workspace/libs/flutter_soloud/example/assets/audio/sample-MP3.mp3',
+          'C:/workspace/libs/flutter_soloud/example/assets/audio/sample-FLAC.flac',
+          'C:/workspace/libs/flutter_soloud/example/assets/audio/sample-OPUS.opus',
+          'C:/workspace/libs/flutter_soloud/example/assets/audio/sample-vorbis.ogg',
+          'C:/5/8_bit_mentality.mp3',
+        ]
+      : [
+          '/Volumes/NVME/Users/deimos/Music/tests/mp3.mp3',
+          '/Volumes/NVME/Users/deimos/Music/tests/flac.flac',
+          '/Volumes/NVME/Users/deimos/Music/tests/ogg_opus.ogg',
+          '/Volumes/NVME/Users/deimos/Music/tests/ogg_vorbis.ogg',
+          '/Volumes/NVME/Users/deimos/Music/tests/ogg_flac.ogg',
+        ];
   int audioPathId = 0;
   int sendTimeDelayMs = 100;
   int chunkSize = 16384;
 
   void composePlainSendFileCommand() {
-    //websocketd --port=8080 --binary=true bash -c 'exec 3<"/$audioPath"; while dd bs=1024 count=1 <&3 status=none; do sleep 0.1; done'
-
     command.clear();
     final fr = sendTimeDelayMs / 1000;
     final audioPath = audioPaths[audioPathId];
-    final fileSize = File(audioPath).lengthSync();
-    final numChunks = (fileSize + chunkSize - 1) ~/ chunkSize;
+    final audioFile = File(audioPath);
+    final fileSize = audioFile.existsSync() ? audioFile.lengthSync() : 0;
+    final numChunks = fileSize > 0 ? (fileSize + chunkSize - 1) ~/ chunkSize : 0;
 
     // count the number of chunks up-front from the file size, then loop exactly
     // that many times using "dd if=... skip=$i". Once all chunks are sent,
     // the shell exits, websocketd closes the WebSocket, and the
     // receiver’s "onDone" fires.
     command.addAll([
-      '/bin/bash',
+      'websocketd',
+      '--port=8080',
+      '--binary=true',
+      widget.shell,
       '-c',
-      'websocketd --port=8080 --binary=true ${widget.shell} -c \'audioPath="$audioPath"; chunkSize=$chunkSize; numChunks=$numChunks; fr=$fr; i=0; while [ \$i -lt $numChunks ]; do dd if="$audioPath" bs=$chunkSize skip=\$i count=1 status=none 2>/dev/null; i=\$((i+1)); sleep $fr; done\'',
+      'audioPath="$audioPath"; chunkSize=$chunkSize; numChunks=$numChunks; fr=$fr; i=0; while [ \$i -lt $numChunks ]; do dd if="$audioPath" bs=$chunkSize skip=\$i count=1 status=none 2>/dev/null; i=\$((i+1)); sleep $fr; done',
     ]);
     widget.onCommandChanged(command);
   }
@@ -82,7 +92,7 @@ class _SendPlainFileState extends State<SendPlainFile> {
           items: List.generate(audioPaths.length, (index) {
             return DropdownMenuItem<int>(
               value: index,
-              child: Text(audioPaths[index].split('/').last),
+              child: Text(audioPaths[index].split(RegExp(r'[/\\]')).last),
             );
           }),
           onChanged: (value) {
